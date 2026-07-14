@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>GaweWarga - Dev Panel</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        village: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            200: '#bbf7d0',
+                            600: '#10b981', /* Green/Emerald Dominan */
+                            700: '#047857',
+                            800: '#065f46',
+                            900: '#064e3b',
+                        },
+                        charcoal: '#1C1917',
+                        warmbg: '#FAFAF9'
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- SweetAlert2 CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        .swal2-popup {
+            border-radius: 1.5rem !important;
+            font-family: ui-sans-serif, system-ui, sans-serif !important;
+        }
+        .swal2-styled.swal2-confirm {
+            background-color: #10b981 !important;
+            border-radius: 1rem !important;
+        }
+    </style>
+</head>
+<body class="bg-stone-50 text-charcoal font-sans min-h-screen pb-24 md:pb-6">
+
+    <!-- =========================================================================
+         DESKTOP HEADER & NAVIGATION
+         ========================================================================= -->
+    <header class="hidden md:block bg-white border-b border-stone-200 sticky top-0 z-40">
+        <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-village-600 rounded-xl flex items-center justify-center shadow-md shadow-village-600/20">
+                    <i data-lucide="cpu" class="w-5 h-5 text-white"></i>
+                </div>
+                <div>
+                    <span class="font-black text-lg text-village-900 tracking-tight">GaweWarga</span>
+                    <span class="ml-2 text-[10px] font-bold bg-red-100 text-red-800 px-2 py-0.5 rounded-full uppercase">SaaS Dev</span>
+                </div>
+            </div>
+            
+            <nav class="flex items-center gap-6">
+                <a href="dashboard.html" class="flex items-center gap-2 text-sm font-semibold text-stone-500 hover:text-village-600 transition">
+                    <i data-lucide="layout-grid" class="w-4 h-4"></i> Beranda
+                </a>
+                <a href="arisan.html" class="flex items-center gap-2 text-sm font-semibold text-stone-500 hover:text-village-600 transition">
+                    <i data-lucide="users" class="w-4 h-4"></i> Arisan
+                </a>
+                <a href="mosque.html" class="flex items-center gap-2 text-sm font-semibold text-stone-500 hover:text-village-600 transition">
+                    <i data-lucide="landmark" class="w-4 h-4"></i> Kas Masjid
+                </a>
+                <a href="developer.html" class="flex items-center gap-2 text-sm font-bold text-village-700">
+                    <i data-lucide="cpu" class="w-4 h-4"></i> Dev Panel
+                </a>
+            </nav>
+
+            <div class="flex items-center gap-4">
+                <div class="text-right">
+                    <p id="desktop-username" class="text-xs font-bold text-stone-800">Developer</p>
+                    <p class="text-[10px] text-red-500 font-semibold uppercase">Super Admin</p>
+                </div>
+                <button id="desktop-logout-btn" class="w-10 h-10 bg-stone-100 hover:bg-red-50 hover:text-red-600 rounded-xl flex items-center justify-center transition text-stone-500">
+                    <i data-lucide="log-out" class="w-5 h-5"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- =========================================================================
+         MOBILE APP HEADER
+         ========================================================================= -->
+    <div class="md:hidden bg-gradient-to-b from-stone-900 to-stone-800 text-white pt-8 pb-12 px-5 rounded-b-[2rem] shadow-lg relative overflow-hidden">
+        <div class="absolute -top-12 -right-12 w-36 h-36 bg-white/5 rounded-full"></div>
+        
+        <div class="relative z-10 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-white/10 backdrop-blur-md rounded-xl flex items-center justify-center border border-white/10">
+                    <i data-lucide="cpu" class="w-5 h-5 text-red-400"></i>
+                </div>
+                <div>
+                    <p class="text-[10px] text-stone-400">SaaS Developer Engine</p>
+                    <h3 class="font-bold text-sm tracking-tight" id="mobile-username">Dev Panel</h3>
+                </div>
+            </div>
+            <span class="text-[9px] font-black bg-red-500/20 text-red-300 border border-red-500/30 px-2.5 py-1 rounded-full uppercase tracking-wider">DEV SYSTEM</span>
+        </div>
+
+        <div class="relative z-10 mt-6 grid grid-cols-2 gap-4">
+            <div class="bg-white/5 backdrop-blur-md rounded-2xl p-3.5 border border-white/5">
+                <p class="text-[9px] text-stone-400 uppercase tracking-wider font-semibold">Total Tenants (RT)</p>
+                <p class="text-sm font-black mt-0.5" id="total-tenants">--</p>
+            </div>
+            <div class="bg-white/5 backdrop-blur-md rounded-2xl p-3.5 border border-white/5">
+                <p class="text-[9px] text-stone-400 uppercase tracking-wider font-semibold">DB Connection</p>
+                <p class="text-sm font-black mt-0.5 text-emerald-400 flex items-center gap-1.5">
+                    <span class="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse"></span> OK
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- =========================================================================
+         KONTEN UTAMA
+         ========================================================================= -->
+    <main class="max-w-6xl mx-auto px-4 md:px-6 -mt-6 md:mt-8 z-20 relative">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <!-- SEKSI KIRI: MANAGEMENT TENANT / RT BARU (2 Kolom di Desktop) -->
+            <div class="lg:col-span-2 space-y-6">
+                
+                <!-- Form Generator Tenant -->
+                <div class="bg-white rounded-3xl p-6 shadow-xl shadow-stone-200/50 border border-stone-100">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-10 h-10 bg-village-50 rounded-xl flex items-center justify-center text-village-600">
+                            <i data-lucide="plus-circle" class="w-5 h-5"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-base font-bold text-stone-800">Registrasi Tenant Baru</h3>
+                            <p class="text-xs text-stone-400">Buat kode akses unik untuk RT / RW baru</p>
+                        </div>
+                    </div>
+
+                    <form id="tenant-form" class="space-y-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-stone-600 uppercase mb-1">Nama RT / RW / Lingkungan</label>
+                                <input type="text" id="tenant-name" required placeholder="Contoh: RT 02 RW 01 Kutorejo" 
+                                    class="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-2xl text-xs focus:ring-2 focus:ring-village-600 focus:outline-none transition">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-stone-600 uppercase mb-1">Kode Unik Tenant</label>
+                                <input type="text" id="tenant-code" required placeholder="Contoh: DESA-KUTOREJO-02" 
+                                    class="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-2xl text-xs font-mono uppercase focus:ring-2 focus:ring-village-600 focus:outline-none transition">
+                            </div>
+                        </div>
+                        <button type="submit" class="w-full py-3 bg-village-600 hover:bg-village-700 text-white rounded-2xl font-bold text-xs shadow-lg shadow-village-600/20 transition flex items-center justify-center gap-2">
+                            <i data-lucide="server" class="w-4 h-4"></i> Daftarkan Tenant & Sinkron Database
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Daftar Tenant Terdaftar -->
+                <div class="bg-white rounded-3xl p-6 shadow-xl shadow-stone-200/50 border border-stone-100">
+                    <h3 class="text-sm font-extrabold text-stone-800 uppercase tracking-wider mb-4">Database Tenant Aktif</h3>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs">
+                            <thead>
+                                <tr class="text-stone-400 border-b border-stone-100">
+                                    <th class="py-3 font-semibold">Nama Lingkungan</th>
+                                    <th class="py-3 font-semibold">Kode Akses (Tenant Code)</th>
+                                    <th class="py-3 font-semibold text-right">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tenant-list-tbody" class="divide-y divide-stone-50">
+                                <!-- Data diisi via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- SEKSI KANAN: STATUS SaaS & TOOLS SIMULATOR -->
+            <div class="space-y-6">
+                
+                <!-- Quick Dev Info -->
+                <div class="bg-white rounded-3xl p-5 shadow-xl shadow-stone-200/50 border border-stone-100">
+                    <h3 class="text-sm font-extrabold text-stone-800 uppercase tracking-wider mb-4">SaaS Engine Status</h3>
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center py-2 border-b border-stone-50 text-xs">
+                            <span class="text-stone-400">Engine Version</span>
+                            <span class="font-mono font-semibold bg-stone-100 text-stone-700 px-2 py-0.5 rounded">v1.2.4-stable</span>
+                        </div>
+                        <div class="flex justify-between items-center py-2 border-b border-stone-50 text-xs">
+                            <span class="text-stone-400">Supabase Connection</span>
+                            <span class="font-semibold text-emerald-600 flex items-center gap-1">
+                                <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-ping"></span> Terhubung
+                            </span>
+                        </div>
+                        <div class="flex justify-between items-center py-2 text-xs">
+                            <span class="text-stone-400">Active Modules</span>
+                            <span class="font-bold text-village-700">Arisan, Masjid, Kas</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reset / Seed Database Simulator -->
+                <div class="bg-stone-900 text-white rounded-3xl p-5 shadow-xl border border-stone-800">
+                    <div class="flex items-center gap-2 mb-3">
+                        <i data-lucide="terminal" class="w-5 h-5 text-red-400"></i>
+                        <h3 class="text-xs font-bold uppercase tracking-wider text-red-400">Danger Zone / Seed DB</h3>
+                    </div>
+                    <p class="text-[11px] text-stone-400 leading-relaxed mb-4">
+                        Gunakan tombol di bawah untuk memasukkan data simulasi (seed data) awal seperti kas masjid dan arisan warga ke database lokal.
+                    </p>
+                    <button id="seed-db-btn" class="w-full py-2.5 bg-red-600/20 hover:bg-red-600 hover:text-white text-red-300 rounded-xl font-bold text-[11px] border border-red-500/30 transition flex items-center justify-center gap-2">
+                        <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Inject Sample / Reset Data
+                    </button>
+                </div>
+
+            </div>
+
+        </div>
+    </main>
+
+    <!-- =========================================================================
+         BOTTOM NAVIGATION BAR (Mobile Only)
+         ========================================================================= -->
+    <div class="md:hidden fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-stone-200 h-16 flex items-center justify-around px-2 z-50 shadow-[0_-5px_20px_rgba(0,0,0,0.05)]">
+        <a href="dashboard.html" class="flex flex-col items-center justify-center text-stone-400 hover:text-village-600 flex-1 py-1">
+            <i data-lucide="layout-grid" class="w-5 h-5"></i>
+            <span class="text-[9px] font-bold mt-1">Beranda</span>
+        </a>
+        <a href="arisan.html" class="flex flex-col items-center justify-center text-stone-400 hover:text-village-600 flex-1 py-1">
+            <i data-lucide="users" class="w-5 h-5"></i>
+            <span class="text-[9px] font-bold mt-1">Arisan</span>
+        </a>
+        <a href="mosque.html" class="flex flex-col items-center justify-center text-stone-400 hover:text-village-600 flex-1 py-1">
+            <i data-lucide="landmark" class="w-5 h-5"></i>
+            <span class="text-[9px] font-bold mt-1">Masjid</span>
+        </a>
+        <button id="mobile-logout-btn" class="flex flex-col items-center justify-center text-stone-400 hover:text-red-500 flex-1 py-1">
+            <i data-lucide="log-out" class="w-5 h-5"></i>
+            <span class="text-[9px] font-bold mt-1">Keluar</span>
+        </button>
+    </div>
+
+    <script type="module" src="js/developer.js"></script>
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+</html>

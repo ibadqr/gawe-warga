@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <title>GaweWarga - Dashboard Warga</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        village: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            200: '#bbf7d0',
+                            600: '#10b981', /* Green/Emerald Dominan */
+                            700: '#047857',
+                            800: '#065f46',
+                            900: '#064e3b',
+                        },
+                        charcoal: '#1C1917',
+                        warmbg: '#FAFAF9'
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- SweetAlert2 CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        /* Custom SweetAlert Green Styling */
+        .swal2-popup {
+            border-radius: 1.5rem !important;
+            font-family: ui-sans-serif, system-ui, sans-serif !important;
+        }
+        .swal2-styled.swal2-confirm {
+            background-color: #10b981 !important;
+            border-radius: 1rem !important;
+        }
+    </style>
+</head>
+<body class="bg-stone-50 text-charcoal font-sans min-h-screen pb-24 md:pb-6">
+
+    <!-- =========================================================================
+         DESKTOP HEADER & NAVIGATION (Hidden on Mobile)
+         ========================================================================= -->
+    <header class="hidden md:block bg-white border-b border-stone-200 sticky top-0 z-40">
+        <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-village-600 rounded-xl flex items-center justify-center shadow-md shadow-village-600/20">
+                    <i data-lucide="smartphone" class="w-5 h-5 text-white"></i>
+                </div>
+                <div>
+                    <span class="font-black text-lg text-village-900 tracking-tight">GaweWarga</span>
+                    <span id="desktop-tenant-badge" class="ml-2 text-[10px] font-bold bg-village-100 text-village-800 px-2 py-0.5 rounded-full uppercase">RT / RW</span>
+                </div>
+            </div>
+            
+            <nav class="flex items-center gap-6">
+                <a href="dashboard.html" class="flex items-center gap-2 text-sm font-bold text-village-700">
+                    <i data-lucide="layout-grid" class="w-4 h-4"></i> Beranda
+                </a>
+                <a href="arisan.html" class="flex items-center gap-2 text-sm font-semibold text-stone-500 hover:text-village-600 transition">
+                    <i data-lucide="users" class="w-4 h-4"></i> Arisan
+                </a>
+                <a href="mosque.html" class="flex items-center gap-2 text-sm font-semibold text-stone-500 hover:text-village-600 transition">
+                    <i data-lucide="landmark" class="w-4 h-4"></i> Kas Masjid
+                </a>
+                <a href="developer.html" id="desktop-dev-link" class="hidden flex items-center gap-2 text-sm font-semibold text-stone-500 hover:text-village-600 transition">
+                    <i data-lucide="cpu" class="w-4 h-4"></i> Dev Panel
+                </a>
+            </nav>
+
+            <div class="flex items-center gap-4">
+                <div class="text-right">
+                    <p id="desktop-username" class="text-xs font-bold text-stone-800">Nama Warga</p>
+                    <p id="desktop-role" class="text-[10px] text-stone-400 capitalize">Warga</p>
+                </div>
+                <button id="desktop-logout-btn" class="w-10 h-10 bg-stone-100 hover:bg-red-50 hover:text-red-600 rounded-xl flex items-center justify-center transition text-stone-500">
+                    <i data-lucide="log-out" class="w-5 h-5"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- =========================================================================
+         MOBILE APP HEADER (Hanya muncul di Mobile)
+         ========================================================================= -->
+    <div class="md:hidden bg-gradient-to-b from-village-800 to-village-600 text-white pt-8 pb-12 px-5 rounded-b-[2rem] shadow-lg relative overflow-hidden">
+        <div class="absolute -top-12 -right-12 w-36 h-36 bg-white/10 rounded-full"></div>
+        
+        <div class="relative z-10 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center border border-white/20">
+                    <i data-lucide="user" class="w-5 h-5 text-white"></i>
+                </div>
+                <div>
+                    <p class="text-[10px] text-emerald-200">Selamat datang,</p>
+                    <h3 id="mobile-username" class="font-bold text-sm tracking-tight">Nama Warga</h3>
+                </div>
+            </div>
+            <!-- Tenant Badge -->
+            <span id="mobile-tenant-badge" class="text-[9px] font-black bg-white/20 backdrop-blur-md text-white border border-white/20 px-2.5 py-1 rounded-full uppercase tracking-wider">KODE RT</span>
+        </div>
+
+        <!-- Info Cepat Saldo Kas Komunitas -->
+        <div class="relative z-10 mt-6 grid grid-cols-2 gap-4">
+            <div class="bg-white/10 backdrop-blur-md rounded-2xl p-3.5 border border-white/10">
+                <p class="text-[9px] text-emerald-200 uppercase tracking-wider font-semibold">Kas Masjid</p>
+                <p class="text-sm font-black mt-0.5">Rp 12.450.000</p>
+            </div>
+            <div class="bg-white/10 backdrop-blur-md rounded-2xl p-3.5 border border-white/10">
+                <p class="text-[9px] text-emerald-200 uppercase tracking-wider font-semibold">Arisan Aktif</p>
+                <p class="text-sm font-black mt-0.5">Rp 1.500.000 <span class="text-[9px] font-normal text-emerald-200">/bln</span></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- =========================================================================
+         KONTEN UTAMA (RESPONSIF & PRESISI DI MOBILE)
+         ========================================================================= -->
+    <main class="max-w-6xl mx-auto px-4 md:px-6 -mt-6 md:mt-8 z-20 relative">
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            
+            <!-- SEKSI KIRI: MENU MODUL WARGA (Utama & Interaktif) -->
+            <div class="md:col-span-2 space-y-6">
+                
+                <!-- Menu Cepat Modul -->
+                <div class="bg-white rounded-3xl p-5 shadow-xl shadow-stone-200/50 border border-stone-100">
+                    <h3 class="text-sm font-extrabold text-stone-800 uppercase tracking-wider mb-4">Layanan Warga</h3>
+                    
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                        <!-- Modul Arisan -->
+                        <a href="arisan.html" class="group flex flex-col items-center text-center p-4 bg-stone-50 hover:bg-village-50 rounded-2xl border border-stone-100 hover:border-village-200 transition duration-300">
+                            <div class="w-12 h-12 bg-amber-100 text-amber-600 rounded-2xl flex items-center justify-center mb-3 group-hover:scale-110 transition duration-300">
+                                <i data-lucide="users" class="w-6 h-6"></i>
+                            </div>
+                            <span class="text-xs font-bold text-stone-700 group-hover:text-village-900">Arisan RT</span>
+                            <span class="text-[9px] text-stone-400 mt-1">Sistem kocokan digital</span>
+                        </a>
+
+                        <!-- Modul Kas Masjid -->
+                        <a href="mosque.html" class="group flex flex-col items-center text-center p-4 bg-stone-50 hover:bg-village-50 rounded-2xl border border-stone-100 hover:border-village-200 transition duration-300">
+                            <div class="w-12 h-12 bg-village-100 text-village-600 rounded-2xl flex items-center justify-center mb-3 group-hover:scale-110 transition duration-300">
+                                <i data-lucide="landmark" class="w-6 h-6"></i>
+                            </div>
+                            <span class="text-xs font-bold text-stone-700 group-hover:text-village-900">Kas Masjid</span>
+                            <span class="text-[9px] text-stone-400 mt-1">Transparansi keuangan</span>
+                        </a>
+
+                        <!-- Modul Iuran Bulanan -->
+                        <div class="group flex flex-col items-center text-center p-4 bg-stone-50 hover:bg-village-50 rounded-2xl border border-stone-100 hover:border-village-200 cursor-pointer transition duration-300" onclick="alertIuran()">
+                            <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center mb-3 group-hover:scale-110 transition duration-300">
+                                <i data-lucide="wallet" class="w-6 h-6"></i>
+                            </div>
+                            <span class="text-xs font-bold text-stone-700 group-hover:text-village-900">Iuran Sampah</span>
+                            <span class="text-[9px] text-stone-400 mt-1">Tagihan keamanan/kebersihan</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Banner Informasi Utama Komunitas -->
+                <div class="bg-gradient-to-r from-village-900 to-village-700 rounded-3xl p-6 text-white relative overflow-hidden shadow-lg shadow-village-900/10">
+                    <div class="absolute right-0 bottom-0 top-0 opacity-10 pointer-events-none">
+                        <i data-lucide="megaphone" class="w-48 h-48 -mr-10 -mb-10"></i>
+                    </div>
+                    <span class="text-[9px] font-bold bg-white/20 text-white uppercase px-2 py-0.5 rounded-full tracking-wider">Pengumuman</span>
+                    <h4 class="text-lg font-black mt-2 leading-snug">Kerja Bakti Akbar Hari Minggu Esok!</h4>
+                    <p class="text-xs text-emerald-100 mt-1 leading-relaxed">Diharapkan seluruh kepala keluarga membawa peralatan kebersihan untuk membersihkan selokan utama.</p>
+                </div>
+
+            </div>
+
+            <!-- SEKSI KANAN: AKTIVITAS WARGA & PETUGAS -->
+            <div class="space-y-6">
+                
+                <!-- Log Aktivitas Terbaru -->
+                <div class="bg-white rounded-3xl p-5 shadow-xl shadow-stone-200/50 border border-stone-100">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-sm font-extrabold text-stone-800 uppercase tracking-wider">Log Kegiatan RT</h3>
+                        <i data-lucide="activity" class="w-4 h-4 text-village-600 animate-pulse"></i>
+                    </div>
+
+                    <div class="space-y-4">
+                        <!-- Item 1 -->
+                        <div class="flex gap-3">
+                            <div class="w-8 h-8 rounded-full bg-amber-50 flex items-center justify-center flex-shrink-0 text-amber-600">
+                                <i data-lucide="users" class="w-4 h-4"></i>
+                            </div>
+                            <div>
+                                <p class="text-xs font-bold text-stone-700">Kocokan Arisan Selesai</p>
+                                <p class="text-[10px] text-stone-400">Pemenang bulan ini: Ibu Sri Astuti (RT 02)</p>
+                                <span class="text-[9px] text-stone-300 font-medium">3 jam yang lalu</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Item 2 -->
+                        <div class="flex gap-3">
+                            <div class="w-8 h-8 rounded-full bg-village-50 flex items-center justify-center flex-shrink-0 text-village-600">
+                                <i data-lucide="landmark" class="w-4 h-4"></i>
+                            </div>
+                            <div>
+                                <p class="text-xs font-bold text-stone-700">Donasi Kas Masjid Masuk</p>
+                                <p class="text-[10px] text-stone-400">Rp 500.000 diterima dari Hamba Allah</p>
+                                <span class="text-[9px] text-stone-300 font-medium">1 hari yang lalu</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pengurus RT Kontak Card -->
+                <div class="bg-white rounded-3xl p-5 shadow-xl shadow-stone-200/50 border border-stone-100 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-stone-100 rounded-full flex items-center justify-center text-stone-600">
+                            <i data-lucide="shield-check" class="w-5 h-5"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs font-bold text-stone-700">Butuh Bantuan?</p>
+                            <p class="text-[10px] text-stone-400">Hubungi ketua RT via WhatsApp</p>
+                        </div>
+                    </div>
+                    <a href="https://wa.me/#" target="_blank" class="w-10 h-10 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center hover:bg-emerald-200 transition">
+                        <i data-lucide="phone" class="w-4 h-4"></i>
+                    </a>
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- =========================================================================
+         BOTTOM NAVIGATION BAR (Hanya muncul di Mobile)
+         ========================================================================= -->
+    <div class="md:hidden fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-stone-200 h-16 flex items-center justify-around px-2 z-50 shadow-[0_-5px_20px_rgba(0,0,0,0.05)]">
+        <a href="dashboard.html" class="flex flex-col items-center justify-center text-village-600 flex-1 py-1">
+            <i data-lucide="layout-grid" class="w-5 h-5"></i>
+            <span class="text-[9px] font-bold mt-1">Beranda</span>
+        </a>
+        <a href="arisan.html" class="flex flex-col items-center justify-center text-stone-400 hover:text-village-600 flex-1 py-1">
+            <i data-lucide="users" class="w-5 h-5"></i>
+            <span class="text-[9px] font-bold mt-1">Arisan</span>
+        </a>
+        <a href="mosque.html" class="flex flex-col items-center justify-center text-stone-400 hover:text-village-600 flex-1 py-1">
+            <i data-lucide="landmark" class="w-5 h-5"></i>
+            <span class="text-[9px] font-bold mt-1">Masjid</span>
+        </a>
+        <button id="mobile-logout-btn" class="flex flex-col items-center justify-center text-stone-400 hover:text-red-500 flex-1 py-1">
+            <i data-lucide="log-out" class="w-5 h-5"></i>
+            <span class="text-[9px] font-bold mt-1">Keluar</span>
+        </button>
+    </div>
+
+    <!-- Panggil Skrip Modul Backend -->
+    <script type="module" src="js/dashboard.js"></script>
+    <script>
+        lucide.createIcons();
+        
+        function alertIuran() {
+            Swal.fire({
+                icon: 'info',
+                title: 'Segera Hadir!',
+                text: 'Modul iuran warga otomatis sedang dalam proses sinkronisasi bank.',
+                confirmButtonText: 'Siap!'
+            });
+        }
+    </script>
+</body>
+</html>
